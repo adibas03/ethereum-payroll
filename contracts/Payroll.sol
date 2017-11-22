@@ -1,6 +1,8 @@
 pragma solidity ^0.4.15;
 
-contract Payroll{
+import 'zeppelin/ownership/owned';
+
+contract Payroll is Owned{
   
     struct Staff {
       bool active;
@@ -16,43 +18,56 @@ contract Payroll{
       bool status;
     }
     
-    mapping(address=>Staff) staffs;
-    mapping(string=>address) staffNames; 
+    mapping(address=>Staff) public staffs;
+    mapping(string=>address) public staffNames;
+    address[] private staffAddreses;
     
-    mapping(string=>mapping(address=>bool)) permissions;
-    mapping(address=>UpdateRequest) updateRequests;
+    mapping(string=>mapping(address=>bool)) public permissions;
+    mapping(address=>UpdateRequest) public updateRequests;
     
-    uint totalStaffs;
-    
-    event PayrollFunded(indexed address,uint);
-    event StaffPayed(indexed address,string,uint);
+    uint totalPaidHours;
+    uint totalUnpaidHours;
     
     
-    function getStaffUnpaidHours(string name) public constant returns(uint){}
+    event PayrollFunded(address indexed fundAddress,uint value);
+    event StaffPayed(address indexed staffAddress,string alias,uint value);
+    event StaffAdded(string alias,address staffAddress);
+    event StaffAddressUpdated(string alias,address prvAddress,address newAddress);
+    //event StaffAddressUpdated(string alias,address address,address address);
+    
+    
+    function totalStaffs()public constant returns(uint){
+      return staffAddreses.length;
+    }
+    
+    function getStaffUnpaidHours(string alias) public constant returns(uint){}
       
-    function getStaffPaidHours(string name) public constant returns(uint){}
-    
-    function gettotalUnpaidHours(string name) public constant returns(uint){}
-      
-    function gettotalPaidHours(string name) public constant returns(uint){}
-    
-      
-    
-    
-    
-    function payStaff(string name,uint hours,uint rate) isStaffName(name) public {}
-      
-    function payBatchStaffs(uint count,uint hours,uint rate)public {}//Pay count number of staffs hours number of unpaidHours
-      
-    function payBatchStaffsAll(uint count,uint rate)public {}//Pay count number of staffs all unpaid 
+    function getStaffPaidHours(string alias) public constant returns(uint){}
       
     
+    function emptyStorage() generalPermission(msg.sender) public {}//Refund all remaining contract funds to the owner address
+    
+    
+    
+    function payStaff(string alias,uint numHours,uint rate) isStaffName(alias) public {}
+      
+    function payBatchStaffs(uint count,uint numHours,uint rate)public {}//Pay count number of staffs hours number of unpaidHours
+      
+    function payBatchStaffsAll(uint count,uint rate)public {}//Pay count number of staffs all unpaid
+      
       
     
+    function payAddressAmount(address _addr, uint value) internal{}//Actual function that transfers funds to staffs, should always be the last call in any function or set of functions
+      
     
+    function deletestaffAddress(address _addr) internal {}
+      
     function setStaffNewAddress(address _addr) isStaff(msg.sender) public {}
       
+    function updateStaffStatus(string alias)
+      
     function setNewStaff() hasPermission(msg.sender,'add') public {}
+      
       
     modifier hasPermission(_addr,task){
       require(permissions[task][_addr]);
@@ -64,8 +79,13 @@ contract Payroll{
       _;
     }
     
-    modifier isStaffName(string name){
-      require( staffs[ staffNames[name] ].active );
+    modifier isStaffName(string alias){
+      require( staffs[ staffNames[alias] ].active );
+      _;
+    }
+    
+    modifier generalPermission(address _addr){
+      require (owner == _addr || staffs[_addr].active);
       _;
     }
     

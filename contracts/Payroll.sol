@@ -33,16 +33,20 @@ contract Payroll is Owned{
     event StaffPayed(address indexed staffAddress,string alias,uint value);
     event StaffAdded(string alias,address staffAddress);
     event StaffAddressUpdated(string alias,address prvAddress,address newAddress);
-    //event StaffAddressUpdated(string alias,address address,address address);
+    event storageEmptied(address staffAddress,uint value);
     
     
     function totalStaffs()public constant returns(uint){
       return staffAddreses.length;
     }
     
-    function getStaffUnpaidHours(string alias) public constant returns(uint){}
+    function getStaffUnpaidHours(string alias) public constant returns(uint){
+      return staffs[ staffNames[alias] ].unpaidHours;
+    }
       
-    function getStaffPaidHours(string alias) public constant returns(uint){}
+    function getStaffPaidHours(string alias) public constant returns(uint){
+      return staffs[ staffNames[alias] ].paidHours;
+    }
       
     
     function emptyStorage() generalPermission(msg.sender) public {}//Refund all remaining contract funds to the owner address

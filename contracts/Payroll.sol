@@ -78,6 +78,11 @@ contract Payroll is Owned{
       _;
     }
     
+    modifier generalPermission(address _addr){
+      require (owner == _addr || staffs[_addr].active);
+      _;
+    }
+    
     modifier isStaff(address _addr){
       require(staffs[_addr].active);
       _;
@@ -85,11 +90,6 @@ contract Payroll is Owned{
     
     modifier isStaffName(string alias){
       require( staffs[ staffNames[alias] ].active );
-      _;
-    }
-    
-    modifier generalPermission(address _addr){
-      require (owner == _addr || staffs[_addr].active);
       _;
     }
     
